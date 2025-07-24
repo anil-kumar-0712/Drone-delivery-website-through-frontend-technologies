@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sky2Door – Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: #f3f4f6;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #1f2937;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Modified glass-card to be a link */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s;
+      display: block; /* Make the entire card clickable */
+      text-decoration: none; /* Remove underline from link */
+      color: inherit; /* Inherit text color */
+    }
+
+    .glass-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .btn-neon {
+      background: transparent;
+      border: 2px solid #6366f1;
+      color: #6366f1;
+      padding: 12px 32px;
+      font-weight: 700;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      transition: all 0.3s ease;
+    }
+
+    .btn-neon:hover {
+      background-color: #6366f1;
+      color: white;
+    }
+
+    /* Modals/Overlays (not present on dashboard.html, but keeping for consistency) */
+    #verificationModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .dashboardContent {
+      background: white;
+      padding: 3rem 2rem;
+      border-radius: 1rem;
+      max-width: 1200px;
+      width: 95%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      animation: slideUp 0.4s ease-out;
+      text-align: center;
+      margin: auto;
+    }
+
+    .modalContent { /* Used for the tutorial modal too */
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      animation: slideUp 0.4s ease-out;
+      text-align: center;
+    }
+
+    /* Keyframe Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes fadeInUp {
+      0% { opacity: 0; transform: translateY(30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Background Decorations */
+    .decorations {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
+
+    .decor-circle {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(99, 102, 241, 0.1);
+      animation: float 10s infinite ease-in-out;
+    }
+
+    .decor-circle:nth-child(1) { width: 80px; height: 80px; top: 10%; left: 5%; }
+    .decor-circle:nth-child(2) { width: 120px; height: 120px; bottom: 15%; right: 10%; }
+    .decor-circle:nth-child(3) { width: 60px; height: 60px; top: 50%; left: 50%; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+
+    /* Error Messages */
+    .error-message {
+      color: #ef4444;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      text-align: left;
+    }
+
+    .input-error {
+      border-color: #ef4444 !important;
+    }
+
+    /* Tutorial Modal Specific Styles */
+    #tutorialModal {
+      display: none; /* Hidden by default */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7); /* Darker overlay */
+      justify-content: center;
+      align-items: center;
+      z-index: 1000; /* Ensure it's on top of everything */
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    #tutorialModal .modalContent {
+        max-width: 600px; /* Wider for tutorial content */
+        padding: 3rem;
+    }
+  </style>
+</head>
+<body class="flex flex-col items-center min-h-screen bg-gray-100 p-4">
+  <div class="decorations">
+    <div class="decor-circle"></div>
+    <div class="decor-circle"></div>
+    <div class="decor-circle"></div>
+  </div>
+
+  <div class="dashboardContent">
+    <h2 id="welcomeMessage" class="text-4xl md:text-5xl font-extrabold text-indigo-700 mb-6"></h2>
+
+    <p class="text-lg md:text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
+      Manage your drone deliveries, track your packages, and explore new possibilities with Sky2Door's smart platform.
+    </p>
+
+    <a href="new_order.html" class="btn-neon mb-10 inline-flex items-center justify-center">Order Your First Drone Delivery</a>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+      <a href="track_deliveries.html" class="glass-card p-6 flex flex-col items-start">
+        <h3 class="text-xl font-bold text-indigo-600 mb-2">📦 Track Deliveries</h3>
+        <p class="text-gray-700">View the real-time status and location of all your active orders.</p>
+      </a>
+      <a href="update_profile.html" class="glass-card p-6 flex flex-col items-start">
+        <h3 class="text-xl font-bold text-indigo-600 mb-2">👤 Update Profile</h3>
+        <p class="text-gray-700">Keep your personal and delivery information up-to-date.</p>
+      </a>
+      <a href="order_history.html" class="glass-card p-6 flex flex-col items-start">
+        <h3 class="text-xl font-bold text-indigo-600 mb-2">📜 Order History</h3>
+        <p class="text-gray-700">Review all your past drone delivery orders and details.</p>
+      </a>
+      <a href="settings.html" class="glass-card p-6 flex flex-col items-start">
+        <h3 class="text-xl font-bold text-indigo-600 mb-2">⚙️ Settings</h3>
+        <p class="text-gray-700">Configure your preferences and notification settings.</p>
+      </a>
+      <a href="support_help.html" class="glass-card p-6 flex flex-col items-start">
+        <h3 class="text-xl font-bold text-indigo-600 mb-2">📞 Support & Help</h3>
+        <p class="text-gray-700">Access our comprehensive help center or contact support.</p>
+      </a>
+      <a href="favorites.html" class="glass-card p-6 flex flex-col items-start">
+        <h3 class="text-xl font-bold text-indigo-600 mb-2">⭐ Favorites</h3>
+        <p class="text-gray-700">Save your most frequent delivery locations and items for quick re-ordering.</p>
+      </a>
+    </div>
+  </div>
+
+  <div id="tutorialModal" class="flex">
+    <div class="modalContent space-y-6">
+      <h2 class="text-2xl font-bold text-indigo-700 mb-4">Quick Tour of Your Dashboard!</h2>
+      <p class="text-gray-700 text-lg leading-relaxed">
+        This is your central hub for all things Sky2Door.
+        Here you can quickly **Order Your First Delivery**,
+        **Track** existing packages, update your **Profile**,
+        and explore your **Order History**. Let's get started!
+      </p>
+      <div class="flex justify-center mt-6">
+        <button onclick="closeTutorial()" class="btn-neon">Got It!</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Custom Alert/Message Box (Replaces window.alert())
+    function alertUserMessage(message) {
+      console.log("App Message: " + message);
+    }
+
+    // Function to get URL parameters
+    function getUrlParameter(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    };
+
+    // Function to close the tutorial modal
+    function closeTutorial() {
+      document.getElementById('tutorialModal').style.display = 'none';
+      // Optional: Clear the showTutorial parameter from the URL after closing the tutorial
+      // This prevents the tutorial from showing again if the user refreshes the page
+      const url = new URL(window.location.href);
+      url.searchParams.delete('showTutorial');
+      window.history.replaceState({}, document.title, url.toString());
+    }
+
+    // On page load, check for greeting and tutorial parameters
+    document.addEventListener('DOMContentLoaded', function() {
+        const welcomeMessageElement = document.getElementById('welcomeMessage');
+        const tutorialModal = document.getElementById('tutorialModal');
+
+        const greeting = getUrlParameter('greeting');
+        const showTutorial = getUrlParameter('showTutorial'); // Check for tutorial flag
+
+        if (greeting) {
+            welcomeMessageElement.textContent = greeting;
+        } else {
+            // Default message if no specific greeting is provided
+            welcomeMessageElement.textContent = "Welcome to your Sky2Door Home!";
+        }
+
+        // Display tutorial if the flag is present
+        if (showTutorial === 'true') {
+            tutorialModal.style.display = 'flex';
+        } else {
+            tutorialModal.style.display = 'none'; // Ensure it's hidden by default if not coming from signup
+        }
+    });
+  </script>
+</body>
+</html>
